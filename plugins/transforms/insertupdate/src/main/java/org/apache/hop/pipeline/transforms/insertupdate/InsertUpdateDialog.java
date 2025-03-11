@@ -83,6 +83,12 @@ public class InsertUpdateDialog extends BaseTransformDialog {
 
   private Button wUpdateBypassed;
 
+  private Button wFixConflict;
+
+  private TextVar wErrCodeField;
+
+  private TextVar wErrMessageField;
+
   private final InsertUpdateMeta input;
 
   /** List of ColumnInfo that should have the field names of the selected database table */
@@ -249,12 +255,67 @@ public class InsertUpdateDialog extends BaseTransformDialog {
     wUpdateBypassed.setLayoutData(fdUpdateBypassed);
     wUpdateBypassed.addSelectionListener(new ComponentSelectionListener(input));
 
+    // FixConflict line
+    Label wlFixConflict = new Label(shell, SWT.RIGHT);
+    wlFixConflict.setText(
+            BaseMessages.getString(PKG, "InsertUpdateDialog.FixConflict.Label"));
+    PropsUi.setLook(wlUpdateBypassed);
+    FormData fdlFixConflict = new FormData();
+    fdlFixConflict.left = new FormAttachment(0, 0);
+    fdlFixConflict.top = new FormAttachment(wUpdateBypassed, margin);
+    fdlFixConflict.right = new FormAttachment(middle, -margin);
+    wlFixConflict.setLayoutData(fdlFixConflict);
+    wFixConflict = new Button(shell, SWT.CHECK);
+    PropsUi.setLook(wUpdateBypassed);
+    FormData fdFixConflict = new FormData();
+    fdFixConflict.left = new FormAttachment(middle, 0);
+    fdFixConflict.top = new FormAttachment(wlFixConflict, 0, SWT.CENTER);
+    fdFixConflict.right = new FormAttachment(100, 0);
+    wFixConflict.setLayoutData(fdFixConflict);
+    wFixConflict.addSelectionListener(new ComponentSelectionListener(input));
+
+    // ErrCodeField line
+    Label wlErrCodeField = new Label(shell, SWT.RIGHT);
+    wlErrCodeField.setText(BaseMessages.getString(PKG, "InsertUpdateDialog.ErrCodeField.Label"));
+    PropsUi.setLook(wlErrCodeField);
+    FormData fdlErrCodeField = new FormData();
+    fdlErrCodeField.left = new FormAttachment(0, 0);
+    fdlErrCodeField.top = new FormAttachment(wFixConflict, margin);
+    fdlErrCodeField.right = new FormAttachment(middle, -margin);
+    wlErrCodeField.setLayoutData(fdlErrCodeField);
+    wErrCodeField = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wErrCodeField);
+    wErrCodeField.addModifyListener(lsMod);
+    FormData fdErrCodeField = new FormData();
+    fdErrCodeField.left = new FormAttachment(middle, 0);
+    fdErrCodeField.top = new FormAttachment(wFixConflict, margin);
+    fdErrCodeField.right = new FormAttachment(100, 0);
+    wErrCodeField.setLayoutData(fdErrCodeField);
+
+    // ErrMessageField line
+    Label wlErrMessageField = new Label(shell, SWT.RIGHT);
+    wlErrMessageField.setText(BaseMessages.getString(PKG, "InsertUpdateDialog.ErrMessageField.Label"));
+    PropsUi.setLook(wlErrMessageField);
+    FormData fdlErrMessageField = new FormData();
+    fdlErrMessageField.left = new FormAttachment(0, 0);
+    fdlErrMessageField.top = new FormAttachment(wErrCodeField, margin);
+    fdlErrMessageField.right = new FormAttachment(middle, -margin);
+    wlErrMessageField.setLayoutData(fdlErrMessageField);
+    wErrMessageField = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    PropsUi.setLook(wErrMessageField);
+    wErrMessageField.addModifyListener(lsMod);
+    FormData fdErrMessageField = new FormData();
+    fdErrMessageField.left = new FormAttachment(middle, 0);
+    fdErrMessageField.top = new FormAttachment(wErrCodeField, margin);
+    fdErrMessageField.right = new FormAttachment(100, 0);
+    wErrMessageField.setLayoutData(fdErrMessageField);
+
     Label wlKey = new Label(shell, SWT.NONE);
     wlKey.setText(BaseMessages.getString(PKG, "InsertUpdateDialog.Keys.Label"));
     PropsUi.setLook(wlKey);
     FormData fdlKey = new FormData();
     fdlKey.left = new FormAttachment(0, 0);
-    fdlKey.top = new FormAttachment(wUpdateBypassed, margin);
+    fdlKey.top = new FormAttachment(wErrMessageField, margin);
     wlKey.setLayoutData(fdlKey);
 
     int nrKeyCols = 4;
@@ -610,6 +671,9 @@ public class InsertUpdateDialog extends BaseTransformDialog {
 
     wCommit.setText(input.getCommitSize());
     wUpdateBypassed.setSelection(input.isUpdateBypassed());
+    wFixConflict.setSelection(input.isFixConflict());
+    wErrCodeField.setText(Const.nullToEmpty(input.getErrCodeField()));
+    wErrMessageField.setText(Const.nullToEmpty(input.getErrMessageField()));
 
     if (input.getInsertUpdateLookupField().getLookupKeys() != null) {
       for (int i = 0; i < input.getInsertUpdateLookupField().getLookupKeys().size(); i++) {
@@ -677,6 +741,9 @@ public class InsertUpdateDialog extends BaseTransformDialog {
 
     inf.setCommitSize(wCommit.getText());
     inf.setUpdateBypassed(wUpdateBypassed.getSelection());
+    inf.setFixConflict(wFixConflict.getSelection());
+    inf.setErrCodeField(wErrCodeField.getText());
+    inf.setErrMessageField(wErrMessageField.getText());
 
     if (log.isDebug()) {
       logDebug(BaseMessages.getString(PKG, "InsertUpdateDialog.Log.FoundKeys", nrkeys + ""));

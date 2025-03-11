@@ -17,7 +17,6 @@
 
 package org.apache.hop.pipeline.transforms.insertupdate;
 
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
@@ -42,6 +41,8 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transform.utils.RowMetaUtils;
+
+import java.util.List;
 
 @Transform(
     id = "InsertUpdate",
@@ -70,6 +71,15 @@ public class InsertUpdateMeta extends BaseTransformMeta<InsertUpdate, InsertUpda
       injectionKeyDescription = "InsertUpdateMeta.Injection.COMMIT_SIZE",
       injectionKey = "COMMIT_SIZE")
   private String commitSize;
+
+  @HopMetadataProperty(
+          key="fix_conflict",
+          injectionKeyDescription = "InsertUpdateMeta.Inject.FIX_CONFLICT",
+          injectionKey = "FIX_CONFLICT")
+  private boolean fixConflict;
+
+  private String errCodeField;
+  private String errMessageField;
 
   /** Bypass any updates */
   @HopMetadataProperty(
@@ -121,6 +131,30 @@ public class InsertUpdateMeta extends BaseTransformMeta<InsertUpdate, InsertUpda
    */
   public void setCommitSize(String commitSize) {
     this.commitSize = commitSize;
+  }
+
+  public boolean isFixConflict() {
+    return fixConflict;
+  }
+
+  public void setFixConflict(boolean fixConflict) {
+    this.fixConflict = fixConflict;
+  }
+
+  public String getErrCodeField() {
+    return errCodeField;
+  }
+
+  public void setErrCodeField(String errCodeField) {
+    this.errCodeField = errCodeField;
+  }
+
+  public String getErrMessageField() {
+    return errMessageField;
+  }
+
+  public void setErrMessageField(String errMessageField) {
+    this.errMessageField = errMessageField;
   }
 
   @Override

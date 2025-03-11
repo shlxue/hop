@@ -41,6 +41,10 @@ public class InsertUpdateValue {
       injectionKeyDescription = "InsertUpdateMeta.Injection.UPDATE_FLAG",
       injectionKey = "UPDATE_FLAG")
   private boolean update;
+  @HopMetadataProperty(
+          key = "sq"
+  )
+  private boolean sqlToken;
 
   public InsertUpdateValue() {}
 
