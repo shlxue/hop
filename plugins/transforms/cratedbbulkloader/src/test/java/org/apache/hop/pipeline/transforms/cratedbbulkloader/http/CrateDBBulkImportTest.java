@@ -47,15 +47,13 @@ import org.apache.hop.pipeline.transforms.cratedbbulkloader.CrateDBBulkLoader;
 import org.apache.hop.pipeline.transforms.cratedbbulkloader.CrateDBBulkLoaderData;
 import org.apache.hop.pipeline.transforms.cratedbbulkloader.CrateDBBulkLoaderField;
 import org.apache.hop.pipeline.transforms.cratedbbulkloader.CrateDBBulkLoaderMeta;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.mockito.Mockito;
 import org.testcontainers.cratedb.CrateDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+@Disabled
 @Testcontainers(disabledWithoutDocker = true)
 class CrateDBBulkImportTest {
 

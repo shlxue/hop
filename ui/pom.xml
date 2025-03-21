@@ -58,10 +58,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>${swt.artifactId}</artifactId>
-            <version>${org.eclipse.platform.version}</version>
-            <scope>compile</scope>
+            <groupId>org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>1.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hop</groupId>

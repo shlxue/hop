@@ -14,52 +14,37 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
+  ~
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.apache.hop</groupId>
-        <artifactId>hop</artifactId>
+        <artifactId>hop-plugins-databases</artifactId>
         <version>2.13.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hop-ui-rcp</artifactId>
-    <version>2.13.0-SNAPSHOT</version>
+    <artifactId>hop-databases-oceanbase</artifactId>
     <packaging>jar</packaging>
-    <name>Hop GUI (RCP fragment)</name>
+    <name>Hop Plugins Databases OceanBase</name>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.hop</groupId>
-            <artifactId>hop-core</artifactId>
+            <artifactId>hop-databases-mysql</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hop</groupId>
-            <artifactId>hop-engine</artifactId>
+            <artifactId>hop-databases-oracle</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.hop</groupId>
-            <artifactId>hop-ui</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.oceanbase</groupId>
+            <artifactId>oceanbase-client</artifactId>
+            <version>2.4.13</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>dep-swt</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.eclipse.platform</groupId>
-                    <artifactId>org.eclipse.swt</artifactId>
-                    <version>${org.eclipse.platform.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

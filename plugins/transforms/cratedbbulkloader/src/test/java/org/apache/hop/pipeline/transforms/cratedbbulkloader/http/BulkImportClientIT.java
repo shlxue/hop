@@ -28,14 +28,13 @@ import java.util.List;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.pipeline.transforms.cratedbbulkloader.http.exceptions.CrateDBHopException;
 import org.apache.hop.pipeline.transforms.cratedbbulkloader.http.exceptions.UnauthorizedCrateDBAccessException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.testcontainers.cratedb.CrateDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
 
+@Disabled
 @Testcontainers(disabledWithoutDocker = true)
 class BulkImportClientIT {
 

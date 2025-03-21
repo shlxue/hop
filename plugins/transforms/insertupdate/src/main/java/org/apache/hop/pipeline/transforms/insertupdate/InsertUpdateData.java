@@ -18,10 +18,13 @@
 package org.apache.hop.pipeline.transforms.insertupdate;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Map;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.pipeline.transform.BaseTransformData;
 import org.apache.hop.pipeline.transform.ITransformData;
+import org.apache.hop.pipeline.jdbc.ErrCodes;
 
 /** Stores data for the Insert/Update transform. */
 @SuppressWarnings("java:S1104")
@@ -44,10 +47,41 @@ public class InsertUpdateData extends BaseTransformData implements ITransformDat
   public IRowMeta lookupReturnRowMeta;
   public IRowMeta insertRowMeta;
 
+  public ErrCodes errCodes;
+  public JdbcStats.TableStats<?> tableStats;
+
+  public StatementHandle updateHandle;
+  public Map<String, StatementHandle> conflictKeyHandles;
+
   /** Default constructor. */
   public InsertUpdateData() {
     super();
 
     db = null;
+  }
+
+  static enum Bag {
+    SINGLE,
+    TEN,
+    X100Hundred,
+    Thousand,
+    TenThousand,
+  }
+
+  static class StatementHandle implements AutoCloseable {
+    private final PreparedStatement statement;
+    private final IRowMeta parameterRowMeta;
+    private final int[] valueNrs;
+
+    StatementHandle(PreparedStatement statement, IRowMeta parameterRowMeta, int[] valueNrs) {
+      this.statement = statement;
+      this.parameterRowMeta = parameterRowMeta;
+      this.valueNrs = valueNrs;
+    }
+
+    @Override
+    public void close() throws SQLException {
+      statement.close();
+    }
   }
 }

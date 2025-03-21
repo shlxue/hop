@@ -42,6 +42,9 @@ public class InsertUpdateValue {
       injectionKey = "UPDATE_FLAG")
   private boolean update;
 
+  @HopMetadataProperty(key = "sqlToken")
+  private boolean sqlToken;
+
   public InsertUpdateValue() {}
 
   public InsertUpdateValue(String updateLookup, String updateStream) {

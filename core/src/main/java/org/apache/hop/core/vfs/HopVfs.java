@@ -533,8 +533,8 @@ public class HopVfs {
    * @return FileObject
    * @throws HopFileException
    */
-  public static synchronized FileObject createTempFile(
-      String prefix, String suffix, String directory) throws HopFileException {
+  public static FileObject createTempFile(String prefix, String suffix, String directory)
+      throws HopFileException {
     try {
       FileObject fileObject;
       do {
@@ -572,7 +572,7 @@ public class HopVfs {
    * @return FileObject
    * @throws HopFileException
    */
-  public static synchronized FileObject createTempFile(
+  public static FileObject createTempFile(
       String prefix, String suffix, String directory, IVariables variables)
       throws HopFileException {
     try {

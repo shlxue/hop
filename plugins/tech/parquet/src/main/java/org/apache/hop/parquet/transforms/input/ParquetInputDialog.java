@@ -30,13 +30,13 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
@@ -45,11 +45,11 @@ import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.PrimitiveType;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -62,10 +62,8 @@ public class ParquetInputDialog extends BaseTransformDialog {
 
   protected ParquetInputMeta input;
 
-  private Combo wFilenameField;
+  private CCombo wFilenameField;
   private TableView wFields;
-
-  private String returnValue;
 
   public ParquetInputDialog(
       Shell parent,
@@ -92,6 +90,7 @@ public class ParquetInputDialog extends BaseTransformDialog {
     shell.setLayout(formLayout);
     shell.setText(BaseMessages.getString(PKG, "ParquetInput.Name"));
 
+    changed = input.hasChanged();
     int middle = props.getMiddlePct();
     int margin = PropsUi.getMargin();
 
@@ -134,7 +133,7 @@ public class ParquetInputDialog extends BaseTransformDialog {
     fdlFilenameField.right = new FormAttachment(middle, -margin);
     fdlFilenameField.top = new FormAttachment(lastControl, margin);
     wlFilenameField.setLayoutData(fdlFilenameField);
-    wFilenameField = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    wFilenameField = new CCombo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     PropsUi.setLook(wFilenameField);
     FormData fdFilenameField = new FormData();
     fdFilenameField.left = new FormAttachment(middle, 0);
@@ -195,9 +194,10 @@ public class ParquetInputDialog extends BaseTransformDialog {
     wFields.setLayoutData(fdFields);
 
     getData();
+    input.setChanged(changed);
 
     BaseDialog.defaultShellHandling(shell, c -> ok(), c -> cancel());
-    return returnValue;
+    return transformName;
   }
 
   private void getFields() {
@@ -285,54 +285,47 @@ public class ParquetInputDialog extends BaseTransformDialog {
       LogChannel.UI.logError("Error getting source fields", e);
     }
 
-    wTransformName.setText(Const.NVL(transformName, ""));
-    wFilenameField.setText(Const.NVL(input.getFilenameField(), ""));
+    wTransformName.setText(Const.nullToEmpty(transformName));
+    wFilenameField.setText(Const.nullToEmpty(input.getFilenameField()));
     for (int i = 0; i < input.getFields().size(); i++) {
       ParquetField field = input.getFields().get(i);
       TableItem item = wFields.table.getItem(i);
       int index = 1;
-      item.setText(index++, Const.NVL(field.getSourceField(), ""));
-      item.setText(index++, Const.NVL(field.getTargetField(), ""));
-      item.setText(index++, Const.NVL(field.getTargetType(), ""));
-      item.setText(index++, Const.NVL(field.getTargetFormat(), ""));
-      item.setText(index++, Const.NVL(field.getTargetLength(), ""));
-      item.setText(index++, Const.NVL(field.getTargetPrecision(), ""));
+      item.setText(index++, Const.nullToEmpty(field.getSourceField()));
+      item.setText(index++, Const.nullToEmpty(field.getTargetField()));
+      item.setText(index++, Const.nullToEmpty(field.getTargetType()));
+      item.setText(index++, Const.nullToEmpty(field.getTargetFormat()));
+      item.setText(index++, Const.nullToEmpty(field.getTargetLength()));
+      item.setText(index++, Const.nullToEmpty(field.getTargetPrecision()));
     }
   }
 
   private void ok() {
-    returnValue = wTransformName.getText();
-
-    getInfo(input);
+    if (Utils.isEmpty(wFilenameField.getText())) {
+      return;
+    }
+    input.setFilenameField(wFilenameField.getText());
+    input.getFields().clear();
+    for (TableItem item : wFields.getNonEmptyItems()) {
+      int index = 1;
+      input.getFields()
+              .add(
+                      new ParquetField(
+                              item.getText(index++),
+                              item.getText(index++),
+                              item.getText(index++),
+                              item.getText(index++),
+                              item.getText(index++),
+                              item.getText(index)));
+    }
+    transformName = wTransformName.getText(); // return value
     input.setChanged();
     dispose();
   }
 
-  private void getInfo(ParquetInputMeta meta) {
-    meta.setFilenameField(wFilenameField.getText());
-    meta.getFields().clear();
-    for (TableItem item : wFields.getNonEmptyItems()) {
-      int index = 1;
-      meta.getFields()
-          .add(
-              new ParquetField(
-                  item.getText(index++),
-                  item.getText(index++),
-                  item.getText(index++),
-                  item.getText(index++),
-                  item.getText(index++),
-                  item.getText(index)));
-    }
-  }
-
   private void cancel() {
-    returnValue = null;
+    transformName = null;
+    input.setChanged(changed);
     dispose();
-  }
-
-  @Override
-  public void dispose() {
-    props.setScreen(new WindowProperty(shell));
-    shell.dispose();
   }
 }

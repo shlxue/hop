@@ -404,25 +404,18 @@ public class ScriptValuesMeta extends BaseTransformMeta<ScriptValues, ScriptValu
           IValueMeta v;
           if (replace[i]) {
             valueIndex = row.indexOfValue(fieldname[i]);
-            if (valueIndex < 0) {
+            if (valueIndex < 0 || Utils.isEmpty(rename[i])) {
               // The field was not found using the "name" field
-              if (Utils.isEmpty(rename[i])) {
-                // There is no "rename" field to try; Therefore we cannot find the
-                // field to replace
+              // There is no "rename" field to try; Therefore we cannot find the
+              // field to replace
+              throw new HopTransformException(
+                  BaseMessages.getString(
+                      PKG, "ScriptValuesMetaMod.Exception.FieldToReplaceNotFound", fieldname[i]));
+            } else {
+              if (row.indexOfValue(rename[i]) >= 0) {
                 throw new HopTransformException(
                     BaseMessages.getString(
-                        PKG, "ScriptValuesMetaMod.Exception.FieldToReplaceNotFound", fieldname[i]));
-              } else {
-                // Lookup the field to replace using the "rename" field
-                valueIndex = row.indexOfValue(rename[i]);
-                if (valueIndex < 0) {
-                  // The field was not found using the "rename" field"; Therefore
-                  // we cannot find the field to replace
-                  //
-                  throw new HopTransformException(
-                      BaseMessages.getString(
-                          PKG, "ScriptValuesMetaMod.Exception.FieldToReplaceNotFound", rename[i]));
-                }
+                        PKG, "ScriptValuesMetaMod.Exception.FieldToReplaceNotFound", rename[i]));
               }
             }
 
@@ -430,6 +423,7 @@ public class ScriptValuesMeta extends BaseTransformMeta<ScriptValues, ScriptValu
             //
             IValueMeta source = row.getValueMeta(valueIndex);
             v = ValueMetaFactory.cloneValueMeta(source, type[i]);
+            v.setName(rename[i]);
             row.setValueMeta(valueIndex, v);
           } else {
             if (!Utils.isEmpty(rename[i])) {

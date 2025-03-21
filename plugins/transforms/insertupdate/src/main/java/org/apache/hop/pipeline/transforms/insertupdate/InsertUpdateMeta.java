@@ -71,6 +71,15 @@ public class InsertUpdateMeta extends BaseTransformMeta<InsertUpdate, InsertUpda
       injectionKey = "COMMIT_SIZE")
   private String commitSize;
 
+  @HopMetadataProperty(
+      key = "fix_conflict_key",
+      injectionKeyDescription = "InsertUpdateMeta.Inject.FIX_CONFLICT_KEY",
+      injectionKey = "FIX_CONFLICT_KEY")
+  private boolean fixConflictKey;
+
+  private String errCodeField;
+  private String errMessageField;
+
   /** Bypass any updates */
   @HopMetadataProperty(
       key = "update_bypassed",
@@ -121,6 +130,30 @@ public class InsertUpdateMeta extends BaseTransformMeta<InsertUpdate, InsertUpda
    */
   public void setCommitSize(String commitSize) {
     this.commitSize = commitSize;
+  }
+
+  public boolean isFixConflictKey() {
+    return fixConflictKey;
+  }
+
+  public void setFixConflictKey(boolean fixConflictKey) {
+    this.fixConflictKey = fixConflictKey;
+  }
+
+  public String getErrCodeField() {
+    return errCodeField;
+  }
+
+  public void setErrCodeField(String errCodeField) {
+    this.errCodeField = errCodeField;
+  }
+
+  public String getErrMessageField() {
+    return errMessageField;
+  }
+
+  public void setErrMessageField(String errMessageField) {
+    this.errMessageField = errMessageField;
   }
 
   @Override

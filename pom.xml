@@ -21,6 +21,7 @@
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>33</version>
+        <relativePath></relativePath>
     </parent>
 
     <groupId>org.apache.hop</groupId>
@@ -318,6 +319,12 @@
                             <properties>
                                 <includeTags>junit5</includeTags>
                             </properties>
+                            <systemPropertyVariables>
+                                <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
+                                <java.awt.headless>true</java.awt.headless>
+                                <junit.jupiter.execution.parallel.enabled>true</junit.jupiter.execution.parallel.enabled>
+                                <junit.jupiter.execution.parallel.config.fixed.parallelism>36</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                            </systemPropertyVariables>
                         </configuration>
                     </execution>
                 </executions>
@@ -395,13 +402,6 @@
                     <logViolationsToConsole>true</logViolationsToConsole>
                     <failOnViolation>true</failOnViolation>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
@@ -501,9 +501,6 @@
                     <value>!false</value>
                 </property>
             </activation>
-            <modules>
-                <module>assemblies</module>
-            </modules>
         </profile>
         <profile>
             <id>assembly</id>
@@ -570,59 +567,24 @@
             </build>
         </profile>
         <profile>
-            <id>swt-unix</id>
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <family>unix</family>
-                </os>
-            </activation>
-            <properties>
-                <env>linux</env>
-                <swt.artifactId>org.eclipse.swt.gtk.linux.x86_64</swt.artifactId>
-            </properties>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.platform</groupId>
-                        <artifactId>${swt.artifactId}</artifactId>
-                        <version>${org.eclipse.platform.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>*</groupId>
-                                <artifactId>*</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
+            <id>dep-swt</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.swt</artifactId>
+                    <version>${org.eclipse.platform.version}</version>
+                </dependency>
+            </dependencies>
         </profile>
         <profile>
-            <id>swt-mac</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <properties>
-                <env>mac</env>
-                <swt.artifactId>org.eclipse.swt.cocoa.macosx.x86_64</swt.artifactId>
-            </properties>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.platform</groupId>
-                        <artifactId>${swt.artifactId}</artifactId>
-                        <version>${org.eclipse.platform.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>*</groupId>
-                                <artifactId>*</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
+            <id>dep-rwt</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.rap</groupId>
+                    <artifactId>org.eclipse.rap.rwt</artifactId>
+                    <version>3.24.0</version>
+                </dependency>
+            </dependencies>
         </profile>
         <profile>
             <id>apache-release</id>
@@ -659,33 +621,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>swt-windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <env>windows</env>
-                <swt.artifactId>org.eclipse.swt.win32.win32.x86_64</swt.artifactId>
-            </properties>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.platform</groupId>
-                        <artifactId>${swt.artifactId}</artifactId>
-                        <version>${org.eclipse.platform.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>*</groupId>
-                                <artifactId>*</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
         </profile>
         <profile>
             <!--

@@ -30,12 +30,9 @@
     <name>Hop Plugins</name>
 
     <modules>
-        <module>actions</module>
         <module>databases</module>
         <module>engines</module>
-        <module>misc</module>
         <module>resolvers</module>
-        <module>tech</module>
         <module>transforms</module>
         <module>valuetypes</module>
     </modules>
@@ -57,12 +54,6 @@
             <groupId>org.apache.hop</groupId>
             <artifactId>hop-ui</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>${swt.artifactId}</artifactId>
-            <version>${org.eclipse.platform.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

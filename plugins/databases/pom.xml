@@ -29,7 +29,7 @@
     <name>Hop Plugins Databases</name>
 
     <modules>
-        <module>access</module>
+        <!--module>access</module>
         <module>as400</module>
         <module>cache</module>
         <module>clickhouse</module>
@@ -57,9 +57,10 @@
         <module>mariadb</module>
         <module>monetdb</module>
         <module>mssql</module>
-        <module>mssqlnative</module>
+        <module>mssqlnative</module-->
         <module>mysql</module>
-        <module>netezza</module>
+        <!--module>netezza</module>
+        <module>oceanbase</module>
         <module>oracle</module>
         <module>oraclerdb</module>
         <module>postgresql</module>
@@ -74,7 +75,7 @@
         <module>teradata</module>
         <module>universe</module>
         <module>vectorwise</module>
-        <module>vertica</module>
+        <module>vertica</module-->
     </modules>
 
     <dependencyManagement>

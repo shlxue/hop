@@ -20,24 +20,24 @@ package org.apache.hop.parquet.transforms.output;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IRowMeta;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.core.gui.WindowProperty;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -63,14 +63,12 @@ public class ParquetOutputDialog extends BaseTransformDialog {
   private Label wlFilenameSplitSize;
   private TextVar wFilenameSplitSize;
   private Button wFilenameCreateFolders;
-  private Combo wCompressionCodec;
-  private Combo wVersion;
+  private CCombo wCompressionCodec;
+  private CCombo wVersion;
   private TextVar wRowGroupSize;
   private TextVar wDataPageSize;
   private TextVar wDictionaryPageSize;
   private TableView wFields;
-
-  private String returnValue;
 
   public ParquetOutputDialog(
       Shell parent,
@@ -97,6 +95,7 @@ public class ParquetOutputDialog extends BaseTransformDialog {
     shell.setLayout(formLayout);
     shell.setText(BaseMessages.getString(PKG, "ParquetOutput.Name"));
 
+    changed = input.hasChanged();
     int middle = props.getMiddlePct();
     int margin = PropsUi.getMargin();
 
@@ -355,7 +354,7 @@ public class ParquetOutputDialog extends BaseTransformDialog {
     fdlCompressionCodec.right = new FormAttachment(middle, -margin);
     fdlCompressionCodec.top = new FormAttachment(lastControl, margin);
     wlCompressionCodec.setLayoutData(fdlCompressionCodec);
-    wCompressionCodec = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    wCompressionCodec = new CCombo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     for (CompressionCodecName codecName : CompressionCodecName.values()) {
       wCompressionCodec.add(codecName.name());
     }
@@ -375,7 +374,7 @@ public class ParquetOutputDialog extends BaseTransformDialog {
     fdlVersion.right = new FormAttachment(middle, -margin);
     fdlVersion.top = new FormAttachment(lastControl, margin);
     wlVersion.setLayoutData(fdlVersion);
-    wVersion = new Combo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    wVersion = new CCombo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
     for (ParquetVersion version : ParquetVersion.values()) {
       wVersion.add(version.getDescription());
     }
@@ -472,9 +471,10 @@ public class ParquetOutputDialog extends BaseTransformDialog {
     wFields.setLayoutData(fdFields);
 
     getData();
+    input.setChanged(changed);
 
     BaseDialog.defaultShellHandling(shell, c -> ok(), c -> cancel());
-    return returnValue;
+    return transformName;
   }
 
   private void enableFields() {
@@ -532,7 +532,10 @@ public class ParquetOutputDialog extends BaseTransformDialog {
   }
 
   private void ok() {
-    returnValue = wTransformName.getText();
+    if (Utils.isEmpty(wTransformName.getText())) {
+      return;
+    }
+    transformName = wTransformName.getText();
 
     input.setFilenameBase(wFilenameBase.getText());
     input.setFilenameExtension(wFilenameExtension.getText());
@@ -566,13 +569,8 @@ public class ParquetOutputDialog extends BaseTransformDialog {
   }
 
   private void cancel() {
-    returnValue = null;
+    transformName = null;
+    input.setChanged(changed);
     dispose();
-  }
-
-  @Override
-  public void dispose() {
-    props.setScreen(new WindowProperty(shell));
-    shell.dispose();
   }
 }

@@ -1,4 +1,4 @@
-package org.apache.hop.pipeline.transforms.insertupdate;
+package org.apache.hop.pipeline.jdbc;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.util.StringUtil;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class SqlErrCodes {
+public final class ErrCodes {
   private static final String[] USE_SQL_STATE_DATABASES;
   private static final String[] SUCCESS_NO_INFO;
   private static final Map<String, String[]> ERROR_CODES_MAP;
@@ -36,7 +36,7 @@ class SqlErrCodes {
 
   static {
     Properties props = new Properties();
-    Class<?> type = SqlErrCodes.class;
+    Class<?> type = ErrCodes.class;
     String path = type.getPackageName().replace(".", "/") + "/sql-codes.properties";
     try (InputStream is = type.getResourceAsStream(path)) {
       props.load(is);
@@ -49,19 +49,19 @@ class SqlErrCodes {
     INDEX_MATCH_PATTERNS = convertByPrefix(props, "indexNameMatch.", s -> s);
   }
 
-  static SqlErrCodes build(String databaseType) {
+  static ErrCodes build(String databaseType) {
     String indexMatchPattern = INDEX_MATCH_PATTERNS.get(databaseType);
     if (StringUtil.isEmpty(indexMatchPattern)) {
       indexMatchPattern = DEFAULT_INDEX_MATCH_PATTERN;
     }
-    return new SqlErrCodes(
+    return new ErrCodes(
         Arrays.binarySearch(SUCCESS_NO_INFO, databaseType) >= 0,
         Arrays.binarySearch(USE_SQL_STATE_DATABASES, databaseType) >= 0,
         ERROR_CODES_MAP.get(databaseType),
         indexMatchPattern);
   }
 
-  private SqlErrCodes(
+  private ErrCodes(
       boolean noInfo, boolean useSqlState, String[] errCodes, String indexNamePattern) {
     this.noInfo = noInfo;
     this.useSqlState = useSqlState;

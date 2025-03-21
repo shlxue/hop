@@ -36,17 +36,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.ArrayUtils;
@@ -1509,6 +1499,7 @@ public class Const {
       return cachedHostname;
     }
 
+    long before = System.currentTimeMillis();
     // In case we don't want to leave anything to doubt...
     //
     String systemHostname = EnvUtil.getSystemProperty(HOP_SYSTEM_HOSTNAME);
@@ -1520,16 +1511,22 @@ public class Const {
     String lastHostname = "localhost";
     try {
       Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+      SortedSet<InetAddress> sortedSet =
+          new TreeSet<>(Comparator.comparing(o -> o.getClass().getSimpleName()));
       while (en.hasMoreElements()) {
         NetworkInterface nwi = en.nextElement();
+        if (nwi.isVirtual()) {
+          continue;
+        }
         Enumeration<InetAddress> ip = nwi.getInetAddresses();
-
         while (ip.hasMoreElements()) {
-          InetAddress in = ip.nextElement();
-          lastHostname = in.getHostName();
-          if (!lastHostname.equalsIgnoreCase("localhost") && !(lastHostname.indexOf(':') >= 0)) {
-            break;
-          }
+          sortedSet.add(ip.nextElement());
+        }
+      }
+      for (InetAddress ia : sortedSet) {
+        lastHostname = ia.getHostName();
+        if (!lastHostname.equalsIgnoreCase("localhost") && !(lastHostname.indexOf(':') >= 0)) {
+          break;
         }
       }
     } catch (SocketException e) {
@@ -1538,6 +1535,19 @@ public class Const {
 
     cachedHostname = lastHostname;
 
+    //    long end = System.currentTimeMillis();
+    //    if (end - before > 100) {
+    //      System.out.println("--- " + (end - before) + " ms");
+    //      StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+    //      int i = 0;
+    //      for (StackTraceElement element : elements) {
+    //        System.out.println(element);
+    //        i++;
+    //        if (i > 3) {
+    //          break;
+    //        }
+    //      }
+    //    }
     return lastHostname;
   }
 
