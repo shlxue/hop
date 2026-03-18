@@ -33,7 +33,7 @@ public @interface HopMetadataProperty {
    * The optional key to store this metadata property under. By the default the name of the field is
    * taken.
    *
-   * @return
+   * @return The key. It should be unique in the parent class.
    */
   String key() default "";
 
@@ -151,4 +151,27 @@ public @interface HopMetadataProperty {
    * @return the type of metadata this property represents.
    */
   HopMetadataPropertyType hopMetadataPropertyType() default HopMetadataPropertyType.NONE;
+
+  /**
+   * When serializing common objects sometimes we don't want to serialize every field. In this
+   * scenario you can specify the fields to serialize.
+   *
+   * @return The names of the fields of the class to serialize.
+   */
+  String[] serializeOnly() default {};
+
+  /**
+   * If you have a String that needs to be encoded in the XML or JSON to be serialized safely, you
+   * can specify an encoder. For example, you can encode to Base64.
+   *
+   * @return The string encoder to use for this property.
+   */
+  Class<? extends IStringEncoder> stringEncoder() default EmptyStringEncoder.class;
+
+  /**
+   * You can use this if you're inheriting a bunch of fields you don't need.
+   *
+   * @return the keys to hide from serialization and metadata injection.
+   */
+  String[] childKeysToIgnore() default {};
 }
