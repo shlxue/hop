@@ -83,11 +83,11 @@ public class Project extends ConfigFile implements IConfigFile {
   private String dataSetsCsvFolder;
   private boolean enforcingExecutionInHome;
   private String parentProjectName;
-  private MultiMetadataProvider metadataProvider;
-  private List<Path> pipelinePaths;
-  private List<Path> workflowPaths;
-  private Map<PipelineMeta, List<TransformMeta>> pipelineTransformsMap;
-  private Map<WorkflowMeta, List<ActionMeta>> workflowActionsMap;
+  @JsonIgnore private MultiMetadataProvider metadataProvider;
+  @JsonIgnore private List<Path> pipelinePaths;
+  @JsonIgnore private List<Path> workflowPaths;
+  @JsonIgnore private Map<PipelineMeta, List<TransformMeta>> pipelineTransformsMap;
+  @JsonIgnore private Map<WorkflowMeta, List<ActionMeta>> workflowActionsMap;
 
   public Project() {
     super();
