@@ -28,7 +28,6 @@ import java.io.Serial;
 import java.util.UUID;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.hop.core.Const;
 import org.apache.hop.core.annotations.HopServerServlet;
 import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
@@ -93,10 +92,6 @@ public class AddExportServlet extends BaseHttpServlet implements IHopServerPlugi
     if (out == null) {
       return;
     }
-    InputStream in = request.getInputStream(); // read from the client
-    if (log.isDetailed()) {
-      logDetailed("Encoding: " + request.getCharacterEncoding());
-    }
 
     boolean isWorkflow =
         TYPE_WORKFLOW.equalsIgnoreCase(
@@ -105,13 +100,18 @@ public class AddExportServlet extends BaseHttpServlet implements IHopServerPlugi
         StringEscapeUtils.escapeHtml(request.getParameter(PARAMETER_LOAD)); // the resource to load
 
     response.setContentType("text/xml");
-    out.print(XmlHandler.getXmlHeader());
-
     response.setStatus(HttpServletResponse.SC_OK);
 
     OutputStream outputStream = null;
 
     try {
+      InputStream in = request.getInputStream(); // read from the client
+      if (log.isDetailed()) {
+        logDetailed("Encoding: " + request.getCharacterEncoding());
+      }
+
+      out.print(XmlHandler.getXmlHeader());
+
       FileObject tempFile =
           HopVfs.createTempFile("export", ".zip", System.getProperty("java.io.tmpdir"));
       outputStream = HopVfs.getOutputStream(tempFile, false);
@@ -235,10 +235,16 @@ public class AddExportServlet extends BaseHttpServlet implements IHopServerPlugi
 
       out.println(new WebResult(WebResult.STRING_OK, fileUrl, serverObjectId));
     } catch (Exception ex) {
-      out.println(new WebResult(WebResult.STRING_ERROR, Const.getStackTracker(ex)));
+      logError("Add export failed", ex);
+      out.println(
+          new WebResult(WebResult.STRING_ERROR, "Export failed. See server log for details."));
     } finally {
       if (outputStream != null) {
-        outputStream.close();
+        try {
+          outputStream.close();
+        } catch (IOException e) {
+          logError("Failed to close export output stream", e);
+        }
       }
     }
   }

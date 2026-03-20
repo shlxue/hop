@@ -192,8 +192,14 @@ public class GetWorkflowStatusServlet extends BaseHttpServlet implements IHopSer
           out.flush();
 
           response.flushBuffer();
-        } catch (HopException e) {
-          throw new ServletException("Unable to get the workflow status in XML or JSON format", e);
+        } catch (HopException | IOException e) {
+          writeXmlOrJsonApiError(
+              response,
+              null,
+              useXml,
+              useJson,
+              "Unable to get the workflow status in XML or JSON format",
+              e);
         }
       } else {
 

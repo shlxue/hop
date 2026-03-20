@@ -63,6 +63,7 @@ public class SniffTransformServlet extends BaseHttpServlet implements IHopServer
   }
 
   @Override
+  @SuppressWarnings("java:S2142")
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     if (isJettyMode() && !request.getContextPath().startsWith(CONTEXT_PATH)) {
@@ -200,7 +201,16 @@ public class SniffTransformServlet extends BaseHttpServlet implements IHopServer
           response.setContentType("text/xml");
           response.setCharacterEncoding(Const.XML_ENCODING);
           out.print(XmlHandler.getXmlHeader(Const.XML_ENCODING));
-          out.println(rowBuffer.getXml());
+          try {
+            out.println(rowBuffer.getXml());
+          } catch (IOException xmlEx) {
+            logError("Failed to serialize sniff rows to XML", xmlEx);
+            out.println(
+                new WebResult(
+                        WebResult.STRING_ERROR,
+                        "Failed to serialize rows to XML: " + xmlEx.getMessage())
+                    .getXml());
+          }
 
         } else if (useJson) {
 

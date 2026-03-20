@@ -187,8 +187,14 @@ public class GetPipelineStatusServlet extends BaseHttpServlet implements IHopSer
           }
           out.flush();
           response.flushBuffer();
-        } catch (HopException e) {
-          throw new ServletException("Unable to get the pipeline status in XML or JSON format", e);
+        } catch (HopException | IOException e) {
+          writeXmlOrJsonApiError(
+              response,
+              null,
+              useXml,
+              useJson,
+              "Unable to get the pipeline status in XML or JSON format",
+              e);
         }
       } else {
         PrintWriter out = getSafeWriter(response);
@@ -561,8 +567,10 @@ public class GetPipelineStatusServlet extends BaseHttpServlet implements IHopSer
           out.println("  pipelinelog.scrollTop=pipelinelog.scrollHeight; ");
           out.println("</script> ");
         } catch (Exception ex) {
+          logError("Error rendering pipeline status HTML page", ex);
           out.println("<pre>");
-          out.println(Encode.forHtml(Const.getStackTracker(ex)));
+          out.println(
+              Encode.forHtml("Unable to display pipeline status. See server log for details."));
           out.println("</pre>");
         }
 

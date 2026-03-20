@@ -87,15 +87,17 @@ public class HopServerServlet extends HttpServlet {
       try {
         plugin.doGet(req, resp);
       } catch (ServletException e) {
-        throw e;
+        log.logError("Hop server plugin request failed", e);
+        sendSafeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Plugin request failed.");
       } catch (Exception e) {
-        throw new ServletException(e);
+        log.logError("Hop server plugin request failed", e);
+        sendSafeError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Plugin request failed.");
       }
     } else {
       if (log.isDebug()) {
         log.logDebug("Unable to find Hop Server Plugin for key: /hop" + req.getPathInfo());
       }
-      resp.sendError(404);
+      sendSafeError(resp, HttpServletResponse.SC_NOT_FOUND, "Not found.");
     }
   }
 

@@ -23,8 +23,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serial;
+import java.nio.charset.StandardCharsets;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
@@ -32,6 +34,7 @@ import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
+import org.apache.hop.core.xml.XmlHandler;
 import org.apache.http.entity.ContentType;
 
 public class BaseHttpServlet extends HttpServlet {
@@ -43,7 +46,8 @@ public class BaseHttpServlet extends HttpServlet {
 
   @Setter @Getter protected HopServerConfig serverConfig;
   protected IVariables variables;
-  protected boolean supportGraphicEnvironment;
+
+  @Setter @Getter protected boolean supportGraphicEnvironment;
 
   @Setter @Getter private boolean jettyMode = false;
 
@@ -194,6 +198,68 @@ public class BaseHttpServlet extends HttpServlet {
     } catch (IOException e) {
       log.logError("Failed to send error response (" + status + "): " + message, e);
       response.setStatus(status);
+    }
+  }
+
+  /**
+   * Log server-side and return a {@link WebResult} error to the client in the requested XML or JSON
+   * shape. Use {@code writer} when the response writer is already acquired for this request;
+   * otherwise pass {@code null} and the output stream is used.
+   */
+  protected void writeXmlOrJsonApiError(
+      HttpServletResponse response,
+      PrintWriter writer,
+      boolean useXml,
+      boolean useJson,
+      String logMessage,
+      Throwable cause) {
+    log.logError(logMessage, cause);
+    final String clientMessage = "Unable to complete request.";
+    if (response.isCommitted()) {
+      return;
+    }
+    try {
+      response.resetBuffer();
+    } catch (IllegalStateException e) {
+      sendSafeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, clientMessage);
+      return;
+    }
+    if (!useXml && !useJson) {
+      sendSafeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, clientMessage);
+      return;
+    }
+    setResponseFormat(response, useXml, useJson);
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    WebResult errorResult = new WebResult(WebResult.STRING_ERROR, clientMessage);
+    try {
+      if (useXml) {
+        String payload = XmlHandler.getXmlHeader(Const.XML_ENCODING) + errorResult.getXml();
+        byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+        if (writer != null) {
+          writer.write(payload);
+          writer.flush();
+        } else {
+          OutputStream os = response.getOutputStream();
+          response.setContentLength(bytes.length);
+          os.write(bytes);
+          os.flush();
+        }
+      } else {
+        String payload = errorResult.getJson();
+        byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+        if (writer != null) {
+          writer.write(payload);
+          writer.flush();
+        } else {
+          OutputStream os = response.getOutputStream();
+          response.setContentLength(bytes.length);
+          os.write(bytes);
+          os.flush();
+        }
+      }
+    } catch (IOException e) {
+      log.logError("Failed to write API error response", e);
+      sendSafeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, clientMessage);
     }
   }
 

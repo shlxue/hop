@@ -17,6 +17,7 @@
 
 package org.apache.hop.www;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.exception.HopXmlException;
@@ -68,6 +69,7 @@ public class WebResult {
     return xml.toString();
   }
 
+  @JsonIgnore
   public String getJson() {
     try {
       return HopJson.newMapper().writerWithDefaultPrettyPrinter().writeValueAsString(this);
