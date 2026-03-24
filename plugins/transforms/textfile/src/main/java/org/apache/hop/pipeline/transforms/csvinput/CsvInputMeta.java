@@ -44,6 +44,7 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.metadata.api.HopMetadataPropertyType;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransformMeta;
@@ -162,7 +163,8 @@ public class CsvInputMeta extends BaseTransformMeta<CsvInput, CsvInputData>
   @HopMetadataProperty(
       key = "schemaDefinition",
       injectionKey = "SCHEMA_DEFINITION",
-      injectionKeyDescription = "CsvInputMeta.Injection.SCHEMA_DEFINITION")
+      injectionKeyDescription = "CsvInputMeta.Injection.SCHEMA_DEFINITION",
+      hopMetadataPropertyType = HopMetadataPropertyType.STATIC_SCHEMA_DEFINITION)
   private String schemaDefinition;
 
   /** Reference to ignore fields tab */
