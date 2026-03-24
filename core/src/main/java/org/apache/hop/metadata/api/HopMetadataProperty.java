@@ -28,7 +28,6 @@ import org.apache.hop.core.injection.InjectionTypeConverter;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface HopMetadataProperty {
-
   /**
    * The optional key to store this metadata property under. By the default the name of the field is
    * taken.
@@ -72,6 +71,11 @@ public @interface HopMetadataProperty {
   String enumNameWhenNotFound() default "";
 
   /**
+   * @return Prevents the item from being serialized or inflated. Default value: false
+   */
+  boolean isExcludedFromSerialization() default false;
+
+  /**
    * @return Prevents the item to be considered in injection. Default value: false
    */
   boolean isExcludedFromInjection() default false;
@@ -102,7 +106,9 @@ public @interface HopMetadataProperty {
    * A description of the field. Right now this is used only for metadata injection purposes
    *
    * @return The description of the property
+   * @deprecated Not used anywhere anymore.
    */
+  @Deprecated(since = "2.18.0")
   String description() default "";
 
   /**
@@ -126,7 +132,7 @@ public @interface HopMetadataProperty {
    *
    * <p>In this scenario we would specify the tags "key" and "value" to populate the list correctly.
    *
-   * @return
+   * @return The tags to put inline
    */
   String[] inlineListTags() default {};
 
@@ -174,4 +180,8 @@ public @interface HopMetadataProperty {
    * @return the keys to hide from serialization and metadata injection.
    */
   String[] childKeysToIgnore() default {};
+
+  Class<?> mapKeyClass() default Object.class;
+
+  Class<?> mapValueClass() default Object.class;
 }
