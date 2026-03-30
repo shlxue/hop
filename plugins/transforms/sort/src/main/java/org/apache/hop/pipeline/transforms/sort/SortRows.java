@@ -51,7 +51,6 @@ import org.apache.hop.pipeline.transform.TransformMeta;
 
 /** Sort the rows in the input-streams based on certain criteria */
 public class SortRows extends BaseTransform<SortRowsMeta, SortRowsData> {
-
   private static final Class<?> PKG = SortRows.class;
 
   public SortRows(
@@ -401,28 +400,10 @@ public class SortRows extends BaseTransform<SortRowsMeta, SortRowsData> {
       return false;
     }
 
-    if (data.newBatch) {
-      data.newBatch = false;
-      setPrevious(r);
-      // this enables Sort stuff to initialize its state.
-      this.addBuffer(getInputRowMeta(), r);
-    } else {
-      if (this.sameGroup(data.previous, r)) {
-        // this performs normal row collection functionality.
-        this.addBuffer(getInputRowMeta(), r);
-      } else {
-        this.preSortBeforeFlush();
-
-        // flush sorted block to next transform:
-        this.passBuffer();
-
-        // new sorted block beginning
-        setPrevious(r);
-        data.newBatch = true;
-
-        this.addBuffer(getInputRowMeta(), r);
-      }
-    }
+    // Add the row to the buffer in memory.
+    // Serialize to disk if too many rows are in memory.
+    //
+    this.addBuffer(getInputRowMeta(), r);
 
     if (checkFeedback(getLinesRead()) && isBasic()) {
       logBasic("Linenr " + getLinesRead());
@@ -464,23 +445,6 @@ public class SortRows extends BaseTransform<SortRowsMeta, SortRowsData> {
         toConvert.add(data.fieldnrs[i]);
       }
     }
-    // Batch boundaries for "group sort" (merge-join style): only fields marked presorted in the
-    // meta participate. When none are presorted, groupnrs is empty and sameGroup() is always true
-    // so all rows accumulate for one global sort (see commit 36af1f6f regression when this used all
-    // sort keys).
-    List<Integer> groupIndices = new ArrayList<>();
-    for (SortRowsField sortField : meta.getSortFields()) {
-      if (sortField.isPreSortedField()) {
-        int idx = inputRowMeta.indexOfValue(sortField.getFieldName());
-        if (idx < 0) {
-          throw new HopException(
-              BaseMessages.getString(
-                  PKG, "SortRows.Error.PresortedFieldNotFound", sortField.getFieldName()));
-        }
-        groupIndices.add(idx);
-      }
-    }
-    data.groupnrs = groupIndices.stream().mapToInt(Integer::intValue).toArray();
 
     data.convertKeysToNative = toConvert.isEmpty() ? null : new int[toConvert.size()];
     int i = 0;
@@ -489,8 +453,6 @@ public class SortRows extends BaseTransform<SortRowsMeta, SortRowsData> {
       i++;
     }
     data.rowComparator = new RowObjectArrayComparator(data.outputRowMeta, data.fieldnrs);
-    // Ensure first incoming row initializes "previous" before sameGroup() is evaluated.
-    data.newBatch = true;
     return false;
   }
 
@@ -667,24 +629,6 @@ public class SortRows extends BaseTransform<SortRowsMeta, SortRowsData> {
     } else {
       // sort in memory
       quickSort(data.buffer);
-    }
-  }
-
-  /*
-   * Group Fields Implementation heroic
-   */
-  // Is the row r of the same group as previous?
-  private boolean sameGroup(Object[] previous, Object[] r) throws HopValueException {
-    if (previous == null || r == null) {
-      return false;
-    }
-    int[] groupFields = data.groupnrs != null ? data.groupnrs : data.fieldnrs;
-    return groupFields != null && getInputRowMeta().compare(previous, r, groupFields) == 0;
-  }
-
-  private void setPrevious(Object[] r) throws HopException {
-    if (r != null) {
-      this.data.previous = getInputRowMeta().cloneRow(r);
     }
   }
 

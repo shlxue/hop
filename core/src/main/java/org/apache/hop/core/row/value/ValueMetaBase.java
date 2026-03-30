@@ -71,8 +71,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopFileException;
 import org.apache.hop.core.exception.HopValueException;
 import org.apache.hop.core.json.HopJson;
-import org.apache.hop.core.logging.HopLogStore;
-import org.apache.hop.core.logging.ILogChannel;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.row.ValueDataUtil;
 import org.apache.hop.core.util.EnvUtil;
@@ -253,8 +252,6 @@ public class ValueMetaBase implements IValueMeta {
   protected boolean ignoreWhitespace;
 
   protected final Comparator<Object> comparator;
-
-  private static final ILogChannel log = HopLogStore.getLogChannelFactory().create("ValueMetaBase");
 
   /** The trim type codes */
   public static final String[] trimTypeCode = {"none", "left", "right", "both"};
@@ -5697,7 +5694,7 @@ public class ValueMetaBase implements IValueMeta {
             data = resultSet.getTimestamp(index + 1);
             break; // Timestamp extends java.util.Date
           } else if (iDatabase.isNetezzaVariant()) {
-            // workaround for IBM netezza jdbc 'special' implementation
+            // workaround for IBM Netezza jdbc 'special' implementation
             data = getNetezzaDateValueWorkaround(iDatabase, resultSet, index + 1);
             break;
           } else {
@@ -5774,14 +5771,14 @@ public class ValueMetaBase implements IValueMeta {
             } else {
               String string = getString(data);
 
-              int maxlen = databaseMeta.getMaxTextFieldLength();
+              int maxFieldLength = databaseMeta.getMaxTextFieldLength();
               int len = string.length();
 
-              // Take the last maxlen characters of the string...
-              int begin = Math.max(len - maxlen, 0);
+              // Take the last maximum length in characters of the string.
+              int begin = Math.max(len - maxFieldLength, 0);
               if (begin > 0) {
-                // Truncate if logging result if it exceeds database maximum string field length
-                log.logMinimal(
+                // Truncate string if it exceeds database maximum string field length
+                LogChannel.GENERAL.logMinimal(
                     String.format(
                         "Truncating %d symbols of original message in '%s' field",
                         begin, getName()));
