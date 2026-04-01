@@ -109,49 +109,29 @@ public class HopGuiPipelineRunDelegate {
     //
     pipelineMeta.setMetadataProvider(hopGui.getMetadataProvider());
 
-    if (debug) {
-      // See if we have debugging information stored somewhere?
-      //
-      pipelineDebugMeta = pipelineDebugMetaMap.get(pipelineMeta);
+    if (debug || preview) {
+      // Both debug and preview collect the first N rows from the selected transform.
+      // Debug additionally activates the pause-on-break-point flag so the pipeline pauses
+      // after delivering the rows, giving Stop/Next control in the preview dialog.
+      Map<PipelineMeta, PipelineDebugMeta> metaMap =
+          debug ? pipelineDebugMetaMap : pipelinePreviewMetaMap;
+      pipelineDebugMeta = metaMap.get(pipelineMeta);
       if (pipelineDebugMeta == null) {
         pipelineDebugMeta = new PipelineDebugMeta(pipelineMeta);
-        pipelineDebugMetaMap.put(pipelineMeta, pipelineDebugMeta);
+        metaMap.put(pipelineMeta, pipelineDebugMeta);
       }
+      // Reset execution-state flag from any previous run so the finished listener
+      // is not silently skipped when the same PipelineDebugMeta object is reused.
+      pipelineDebugMeta.setStopClosePressed(false);
 
-      // Set the default number of rows to retrieve on all selected transforms...
-      //
       List<TransformMeta> selectedTransforms = pipelineMeta.getSelectedTransforms();
       if (!Utils.isEmpty(selectedTransforms)) {
         pipelineDebugMeta.getTransformDebugMetaMap().clear();
         for (TransformMeta transformMeta : pipelineMeta.getSelectedTransforms()) {
           TransformDebugMeta transformDebugMeta = new TransformDebugMeta(transformMeta);
           transformDebugMeta.setRowCount(PropsUi.getInstance().getDefaultPreviewSize());
-          transformDebugMeta.setPausingOnBreakPoint(true);
-          transformDebugMeta.setReadingFirstRows(false);
-          pipelineDebugMeta.getTransformDebugMetaMap().put(transformMeta, transformDebugMeta);
-        }
-      }
-
-    } else if (preview) {
-      // See if we have preview information stored somewhere?
-      //
-      pipelineDebugMeta = pipelinePreviewMetaMap.get(pipelineMeta);
-      if (pipelineDebugMeta == null) {
-        pipelineDebugMeta = new PipelineDebugMeta(pipelineMeta);
-
-        pipelinePreviewMetaMap.put(pipelineMeta, pipelineDebugMeta);
-      }
-
-      // Set the default number of preview rows on all selected transforms...
-      //
-      List<TransformMeta> selectedTransforms = pipelineMeta.getSelectedTransforms();
-      if (!Utils.isEmpty(selectedTransforms)) {
-        pipelineDebugMeta.getTransformDebugMetaMap().clear();
-        for (TransformMeta transformMeta : pipelineMeta.getSelectedTransforms()) {
-          TransformDebugMeta transformDebugMeta = new TransformDebugMeta(transformMeta);
-          transformDebugMeta.setRowCount(PropsUi.getInstance().getDefaultPreviewSize());
-          transformDebugMeta.setPausingOnBreakPoint(false);
           transformDebugMeta.setReadingFirstRows(true);
+          transformDebugMeta.setPausingOnBreakPoint(debug);
           pipelineDebugMeta.getTransformDebugMetaMap().put(transformMeta, transformDebugMeta);
         }
       }
@@ -165,8 +145,6 @@ public class HopGuiPipelineRunDelegate {
               hopGui.getShell(), pipelineGraph.getVariables(), pipelineDebugMeta);
       debugAnswer = pipelineDebugDialog.open();
       if (debugAnswer == PipelineDebugDialog.DEBUG_CANCEL) {
-        // If we cancel the debug dialog, we don't go further with the execution either.
-        //
         return null;
       }
     }

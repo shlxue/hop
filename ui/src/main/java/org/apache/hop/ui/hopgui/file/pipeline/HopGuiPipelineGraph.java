@@ -3937,8 +3937,8 @@ public class HopGuiPipelineGraph extends HopGuiAbstractGraph
           hopGui.getLog(),
           pipelineMeta,
           false,
-          debug,
-          pipelineRunDelegate.getPipelinePreviewExecutionConfiguration().getLogLevel());
+          true,
+          pipelineRunDelegate.getPipelineDebugExecutionConfiguration().getLogLevel());
     } catch (Exception e) {
       new ErrorDialog(hopShell(), CONST_ERROR, CONST_ERROR_PREVIEWING_PIPELINE, e);
     }
@@ -4733,7 +4733,8 @@ public class HopGuiPipelineGraph extends HopGuiAbstractGraph
                       transformDebugMeta.getTransformMeta().getName(),
                       rowBufferMeta,
                       rowBuffer);
-              previewRowsDialog.setProposingToGetMoreRows(true);
+              boolean pipelineStillRunning = pipeline != null && !pipeline.isFinished();
+              previewRowsDialog.setProposingToGetMoreRows(pipelineStillRunning);
               previewRowsDialog.setProposingToStop(true);
               previewRowsDialog.open();
 
