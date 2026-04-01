@@ -20,7 +20,6 @@ package org.apache.hop.metadata.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -52,24 +51,31 @@ public class ReflectionUtil {
    * @return A set of fields.
    */
   public static List<Field> findAllFields(Class<?> clazz) {
-    Set<Field> fieldsSet = new HashSet<>();
+    List<Field> fields = new ArrayList<>();
 
     // Find the fields from the root class
     //
-    Collections.addAll(fieldsSet, clazz.getDeclaredFields());
+    for (Field field : clazz.getDeclaredFields()) {
+      if (doesNotHaveFieldWithName(fields, field.getName())) {
+        fields.add(field);
+      }
+    }
 
     // If this class has a parent class, grab the fields
     //
     Class<?> superClass = clazz.getSuperclass();
     while (superClass != null) {
-      Collections.addAll(fieldsSet, superClass.getDeclaredFields());
+      Field[] parentFields = superClass.getDeclaredFields();
+      for (Field parentField : parentFields) {
+        if (doesNotHaveFieldWithName(fields, parentField.getName())) {
+          fields.add(parentField);
+        }
+      }
 
       // Repeat this process until we have no more super class
       //
       superClass = superClass.getSuperclass();
     }
-
-    List<Field> fields = new ArrayList<>(fieldsSet);
 
     // Sort the fields by name
     fields.sort(Comparator.comparing(Field::getName));
@@ -94,9 +100,11 @@ public class ReflectionUtil {
 
   /**
    * Find all fields from the given class as well as the fields from all the parent classes. It will
-   * recurse all the way to the top class from which the given class inherits from.
+   * recurse all the way to the top class from which the given class inherits from. This means that
+   * it's possible to inherit from other classes during serialization.
    *
-   * <p>This means that it's possible to inherit from other classes during serialization.
+   * <p>IMPORTANT: Unless asked to be sorted we keep the fields in the same order as found in the
+   * class.
    *
    * @param clazz The class to investigate.
    * @param sortFunction the function to extract the key to sort on. If the function returns null
@@ -105,14 +113,14 @@ public class ReflectionUtil {
    */
   public static List<Field> findAllFields(
       Class<?> clazz, Function<Field, String> sortFunction, boolean sortFields) {
-    Set<Field> fieldsSet = new HashSet<>();
+    List<Field> fields = new ArrayList<>();
 
     // Find the fields from the root class
     //
     for (Field classField : clazz.getDeclaredFields()) {
       String keyField = sortFunction.apply(classField);
       if (keyField != null) {
-        fieldsSet.add(classField);
+        fields.add(classField);
       }
     }
     // If this class has a parent class, grab the fields
@@ -121,8 +129,8 @@ public class ReflectionUtil {
     while (superClass != null) {
       for (Field superClassField : superClass.getDeclaredFields()) {
         String keyField = sortFunction.apply(superClassField);
-        if (keyField != null) {
-          fieldsSet.add(superClassField);
+        if (keyField != null && doesNotHaveFieldWithName(fields, superClassField.getName())) {
+          fields.add(superClassField);
         }
       }
 
@@ -131,14 +139,21 @@ public class ReflectionUtil {
       superClass = superClass.getSuperclass();
     }
 
-    List<Field> fields = new ArrayList<>(fieldsSet);
-
     // Sort the fields by name
     if (sortFields) {
       fields.sort(Comparator.comparing(sortFunction));
     }
 
     return fields;
+  }
+
+  private static boolean doesNotHaveFieldWithName(List<Field> fields, String name) {
+    for (Field field : fields) {
+      if (field.getName().equals(name)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public static Object getFieldValue(Object object, String fieldName, boolean isBoolean)
