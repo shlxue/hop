@@ -13,22 +13,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package org.apache.hop.pipeline.transforms.missing;
+package org.apache.hop.workflow.actions;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.hop.pipeline.transform.BaseTransformMeta;
+import org.apache.hop.core.Result;
+import org.apache.hop.core.annotations.Action;
+import org.apache.hop.core.exception.HopException;
+import org.apache.hop.metadata.api.HopMetadataProperty;
+import org.apache.hop.workflow.action.ActionBase;
+import org.apache.hop.workflow.action.IAction;
 
+@Action(id = "ActionFake", name = "Fake action")
 @Getter
 @Setter
-public class Missing extends BaseTransformMeta<MissingTransform, MissingData> {
-  private String transformName;
-  private String missingPluginId;
+public class ActionFake extends ActionBase implements IAction {
+  @HopMetadataProperty private String someProperty;
 
-  public Missing(String transformName, String missingPluginId) {
-    this.transformName = transformName;
-    this.missingPluginId = missingPluginId;
+  public ActionFake() {
+    super("", "", "ActionFake");
+  }
+
+  @Override
+  public Result execute(Result prevResult, int nr) throws HopException {
+    return prevResult;
   }
 }
