@@ -29,6 +29,7 @@
     <name>Hop Plugins Technology</name>
 
     <modules>
+        <module>arrow</module>
         <module>avro</module>
         <module>aws</module>
         <module>azure</module>

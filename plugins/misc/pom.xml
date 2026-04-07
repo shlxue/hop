@@ -37,6 +37,7 @@
         <module>mail</module>
         <module>passwords</module>
         <module>projects</module>
+        <module>py4j</module>
         <module>reflection</module>
         <module>rest</module>
         <module>static-schema</module>
