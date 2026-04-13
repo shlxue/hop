@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.CheckResult;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
@@ -116,11 +117,34 @@ public class StreamLookupMeta extends BaseTransformMeta<StreamLookup, StreamLook
     return new StreamLookupMeta(this);
   }
 
+  /**
+   * Keeps {@link #sourceTransformName} in sync when the lookup info stream is repointed from the
+   * canvas (e.g. hop split, detach, drawing the info hop). Without this, {@link
+   * #searchInfoAndTargetTransforms} would keep resetting the stream from the stale persisted name.
+   */
+  @Override
+  public void handleStreamSelection(IStream stream) {
+    List<IStream> infoStreams = getTransformIOMeta().getInfoStreams();
+    if (infoStreams.isEmpty() || !infoStreams.contains(stream)) {
+      return;
+    }
+    TransformMeta tm = stream.getTransformMeta();
+    if (tm != null) {
+      setSourceTransformName(tm.getName());
+      stream.setSubject(tm.getName());
+    }
+  }
+
   @Override
   public void searchInfoAndTargetTransforms(List<TransformMeta> transforms) {
     List<IStream> infoStreams = getTransformIOMeta().getInfoStreams();
     for (IStream stream : infoStreams) {
-      stream.setTransformMeta(TransformMeta.findTransform(transforms, stream.getSubject()));
+      String lookupName = stream.getSubject();
+      if (StringUtils.isNotBlank(sourceTransformName)) {
+        lookupName = sourceTransformName;
+        stream.setSubject(sourceTransformName);
+      }
+      stream.setTransformMeta(TransformMeta.findTransform(transforms, Const.trim(lookupName)));
     }
   }
 
